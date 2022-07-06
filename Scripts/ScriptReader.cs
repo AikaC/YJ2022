@@ -7,42 +7,67 @@ using TMPro;
 
 public class ScriptReader : MonoBehaviour
 {
-    [SerializeField]
-    private TextAsset _InkJsonFile;
+    private static ScriptReader instance;
+
+    [Header("Dialogue UI")]
+    [SerializeField] private GameObject dialoguePanel;
+    [SerializeField] private TextMeshProUGUI dialogueText;
+    // TextAsset _InkJsonFile;
     private Story _StoryScript;
 
-    public TMP_Text dialogueBox;
     public TMP_Text nameTag;
 
     //image char
     public Image characterIcon;
 
-    //Creates buttons choices
+    public bool dialogueIsPlaying{ get; private set; }
+
+    [Header("Choices UI")]//Creates buttons choices
     [SerializeField]
     private GridLayoutGroup choiceHolder;
     [SerializeField]
     private Button choiceBasePrefab;
 
+    private void Awake()
+    {
+        instance = this;
+    }
+
+    public static ScriptReader GetInstance()
+    {
+       // Debug.LogWarning("More than one Dialogue Manager in the scene :(");
+        return instance;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        LoadStory();
-    }
+        dialogueIsPlaying = false;
+        dialoguePanel.SetActive(false);    }
 
     void Update()
     {
+        if (!dialogueIsPlaying)
+        {
+            return;
+        }
         if (Input.GetKeyDown(KeyCode.Return))
         {
-
             DisplayNextLine();
         }
     }
 
-    void LoadStory()
+    public void LoadStory(TextAsset inkJSON
+        )
     {
-        _StoryScript = new Story(_InkJsonFile.text);
+        _StoryScript = new Story(inkJSON.text);
+        //activate the visual novel ui
+        dialogueIsPlaying = true;
+        dialoguePanel.SetActive(true);
+
         _StoryScript.BindExternalFunction("CharName", (string charName) => ChangeName(charName));
         _StoryScript.BindExternalFunction("Icon", (string charName) => CharacterIcon(charName));
+        DisplayNextLine();
     }
 
     public void DisplayNextLine()
@@ -51,7 +76,7 @@ public class ScriptReader : MonoBehaviour
         {
             string text = _StoryScript.Continue();//Gets next line
             text = text?.Trim();//removes white space from the text
-            dialogueBox.text = text;//Displays new text
+            dialogueText.text = text;//Displays new text
         }
         else if (_StoryScript.currentChoices.Count > 0)
         {
@@ -59,8 +84,15 @@ public class ScriptReader : MonoBehaviour
         }
         else
         {
-            dialogueBox.text = "Done.";
+            CloseStory();
         }
+    }
+
+    private void CloseStory()
+    {
+        dialogueIsPlaying = false;
+        dialoguePanel.SetActive(false);
+        //dialogueText.text = "";
     }
 
     private void DisplayChoices()
