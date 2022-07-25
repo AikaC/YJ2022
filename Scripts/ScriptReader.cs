@@ -27,6 +27,9 @@ public class ScriptReader : MonoBehaviour
     private GridLayoutGroup choiceHolder;
     [SerializeField]
     private Button choiceBasePrefab;
+    
+    //Game Manager
+    private GameManager GM;
 
     private void Awake()
     {
@@ -42,23 +45,27 @@ public class ScriptReader : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        GM = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameManager>();
         dialogueIsPlaying = false;
-        dialoguePanel.SetActive(false);    }
+        dialoguePanel.SetActive(false);
+    }
 
     void Update()
     {
-        if (!dialogueIsPlaying)
+        if(GM.GameStatus() == true)
         {
-            return;
-        }
-        if (Input.GetKeyDown(KeyCode.Return))
-        {
-            DisplayNextLine();
+                if (!dialogueIsPlaying)
+                {
+                    return;
+                }
+                if (Input.GetKeyDown(KeyCode.Return))
+                {
+                    DisplayNextLine();
+                }
         }
     }
 
-    public void LoadStory(TextAsset inkJSON
-        )
+    public void LoadStory(TextAsset inkJSON)
     {
         _StoryScript = new Story(inkJSON.text);
         //activate the visual novel ui
@@ -97,7 +104,7 @@ public class ScriptReader : MonoBehaviour
 
     private void DisplayChoices()
     {
-        if (choiceHolder.GetComponentsInChildren<Button>().Length > 0) return; //Checks if button holdr has button in it
+        if (choiceHolder.GetComponentsInChildren<Button>().Length > 0) return; //Checks if button hold has button in it
         for (int i = 0; i < _StoryScript.currentChoices.Count; i++)
         {
             var choice = _StoryScript.currentChoices[i];
