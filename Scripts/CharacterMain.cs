@@ -8,11 +8,22 @@ public class CharacterMain : MonoBehaviour
     public Rigidbody2D rdbd2d;
 
     private Vector2 moveDirection;
+    
+    //Game Manager
+    private GameManager GM;
+    
+    void Start()
+    {
+        GM = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameManager>();
+    }
 
     // Update is called once per frame
     void Update()
     {
-        ProcessInputs();
+        if (GM.GameStatus() == true)
+        {
+            ProcessInputs();
+        }
     }
 
     void FixedUpdate()
